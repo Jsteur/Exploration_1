@@ -3,11 +3,6 @@ title: 'Exploration 1: Engaging with Alternative Explanations By Matched Stratif
 author: "James, Zach, & Jack"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output:
-  html_document:
-    fig_caption: yes
-    fig_height: 4
-    fig_width: 4
-    graphics: yes
   pdf_document:
     fig_caption: yes
     fig_height: 8
@@ -21,6 +16,11 @@ output:
     - --filter
     - /usr/local/bin/pandoc-crossref
     template: ps531template.latex
+  html_document:
+    fig_caption: yes
+    fig_height: 4
+    fig_width: 4
+    graphics: yes
 graphics: yes
 bibliography: classbib.bib
 ---
@@ -117,7 +117,8 @@ meddat<-transform(meddat, HomRate08=(HomCount2008/Pop2008)*1000)
 ```{r eval=FALSE}
 ## Some commands like a formula object:
 balfmla<-reformulate(c(names(meddat)[c(5:7,9:24)],"HomRate03"),response="nhTrt")
-
+```
+```{r}
 xb0<-xBalance(balfmla,
 	      data=meddat,
 	      report=c("std.diffs","z.scores","adj.means",
@@ -402,6 +403,24 @@ coef(lm2)["nhTrt"]
 lm3<-lm(I(HomRate08-HomRate03)~nhTrt+fm2,data=meddat)
 coef(lm3)["nhTrt"]
 ```
+###To answer your question about if other social goods are produced, we can run some models with different DVs and look at the effects our IV (nhTrt with our balancing procedure) has on these other outcomes.
+
+```{r}
+lm5=lm((CE-meddat$nhCE03)~nhTrt+fm2,data=meddat)
+lm6=lm((PV-meddat$nhPV03)~nhTrt+fm2,data=meddat) 
+lm7=lm((QP-meddat$nhQP03)~nhTrt+fm2,data=meddat)   
+lm8=lm((TP-nhTP03)~nhTrt+fm2,data=meddat)
+coef(lm5)["nhTrt"]
+summary(lm5)
+coef(lm6)["nhTrt"]
+summary(lm6)
+coef(lm7)["nhTrt"]
+summary(lm7)
+coef(lm8)["nhTrt"]
+summary(lm8)
+```
+
+###It looks like infastructure investment in the MetroCable does produce other social goods, although all of the p-values on these tests are highly insignificant. Thus, the treatment may have effects on other outcome variables (social goods), but we do not have strong evidence to support this. We cannot say that the effect of the treatment has an independent effect from chance. 
 
 But, we haven't said anything about *unobserved* covariates (which a truly randomized study would balance, but which our study does not).  Rosenbaum's sensitivity analysis is a formalized thought experiment
 
