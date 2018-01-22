@@ -1,6 +1,6 @@
-ggjcgc---
-title: 'Exploration 1: Engaging with Alternative Explanations with By Matched Stratification'
-author: "Jake Bowers"
+---
+title: 'Exploration 1: Engaging with Alternative Explanations By Matched Stratification'
+author: "James, Zach, & Jack"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output:
   html_document:
@@ -21,7 +21,6 @@ output:
     - --filter
     - /usr/local/bin/pandoc-crossref
     template: ps531template.latex
-  word_document: default
 graphics: yes
 bibliography: classbib.bib
 ---
@@ -31,14 +30,6 @@ bibliography: classbib.bib
 
 
 ```{r include=FALSE, cache=FALSE}
-# Some customization.  You can alter or delete as desired (if you know what you are doing).
-# knitr settings to control how R chunks work.
-
-## To make the html file do
-## render("exploration1.Rmd",output_format=html_document(fig_retina=FALSE))
-## To make the pdf file do
-## render("exploration1.Rmd",output_format=pdf_document())
-
 require(knitr)
 opts_chunk$set(
   tidy=FALSE,     # display code as typed
@@ -70,31 +61,19 @@ what I found out. How does this approach to adjustment overcome some of the
 problems that seem to trouble the linear least squares model based approach?
 What concerns should I have with this analysis?"
 
-> In 2004 the municipality of Medell\'{i}n, Columbia built the first line
- of the Metrocable --- a set of cable cars that connected poor neighborhoods
- on the edges of the city to the center of the city \citep{cerda2012reducing}.
- Professor Magdalena Cerd\'{a} and her collaborators asked whether this kind
- of integration could improve life in these poor (and heretofore violent)
- neighborhoods. We ~~extracted~~ were given some of the data from this project to use
- here.\footnote{The articles can be both found in this web directory
- \url{http://jakebowers.org/Matching/}.}
+### Hello, mysterious stranger on the phone. I am happy to help answer your questions and talk to you more about the analysis I and my fellow data scientists have conducted on your work.
+
+###To begin, it looks like there are 45 neighborhoods that were analyzed in your data set in 2003 and 2008. 22 of these neighborhoods have access to the installed Metrocable line, and 23 of them did not have access after 2004. Since the data you have is observational--that is, we are making inferences where we cannot control all the variables at play and analyze the data from the observations--we need to think about how we will be comparing these different groups. Since all of these neighborhoods contain different characteristics in terms of its people's ages, gender, the rates of violence in the different neighborhoods, and a slew of other factors that the data has, we want to make sure our comparisons between the neighborhoods are similar to one another. For example, it wouldn't be fair to compare two neighborhoods to one another and see if the cable lines decreased rates of violence where certain variables like income could affect the results. As a result, we want to group neighborhoods that are similar enough on a slew of characteristics before the bridges were installed to see if the neighborhoods are similar enough to one another to discern if the bridges indicate any substantial effects. 
+###Since you, mysterious stranger, want to know if the Metrocable line decreased violence in the poor neighborhoods, it is important for us to determine if the neighborhoods who had access to the Metrocable line and those who did not have access to it have comparable homocide rates.
 
 ```{r}
-install.packages('MASS')
 library(MASS)
-install.packages('RItools')
 library(RItools)
-install.packages('optmatch')
 library(optmatch)
 load(url("http://jakebowers.org/Data/meddat.rda"))
 ```
 
-
-> The data Cerd\'{a} collected tell us about the roughly `r nrow(meddat)`
-neighborhoods in the study, `r signif(sum(meddat$nhTrt),2)` of which had
-access to the Metrocable line and `r signif(sum(1-meddat$nhTrt),2)` did not.
-
-> We don't have a formal codebook. Here are some guesses about the meanings of
+We don't have a formal codebook. Here are some guesses about the meanings of
 some of the variables. There are more variables in the data file than those
 listed here.
 
@@ -124,23 +103,16 @@ HomCount2008 Number of homicides in 2008
 Pop2008      Population in 2008
 ```
 
-
 ```{r}
-## These next are equivalent ways to get rates per 1000 from counts
-## meddat$HomRate03<-with(meddat, (HomCount2003/Pop2003)*1000)
-## meddat$HomRate08<-with(meddat, (HomCount2008/Pop2008)*1000)
 meddat<-transform(meddat, HomRate03=(HomCount2003/Pop2003)*1000)
 meddat<-transform(meddat, HomRate08=(HomCount2008/Pop2008)*1000)
 ```
 
-> We tried to make a matched design to counter alternative explanations for
-the intervention-versus-non-intervention comparison without having to commit to
-linear relationships or common support or to worry about extrapolation or
-interpolation. We have `nhTrt` as our intervention or treatment and things
-measured in 2008 as outcomes with things measured in 2003 as occuring before
-the Metrocable was built. The other variables, measured before the treatment
-are plausibly covariates.
+### Our team calculated the percentage of homocides in 2003 and 2008 for the different neighborhoods for every 1000 people for the purposes of analysis. 
 
+### Since this is an observational study, we were not able to manipulate and control the different variables as much as we would like to. If this were possible, we could talk more about the associational relationship between the different variables. However, given the large amount of variables, controlling for different factors and assuming linearity is naive and probably untrue. As a result, we didn't want to committ to a linear relationship that focused on two different variables and control for a host of factors that could very well be influencing our effect. In short, we are attempting to do a matched design to measure how closely the different neighborhoods are to one another in terms of as many variables as possible. 
+
+### Put differently, we want to make sure the neighborhoods we are comparing are similar enough to one another that we feel confident in making inferences about the effects of the Metrocable line as a treatment. We want to match and ensure the choices we make to compare the neighborhoods is as accurate as possible; however, given your questions, the biggest factor to consider when we make comparisons are the different neighborhoods' initial homocide rates. 
 
 ```{r eval=FALSE}
 ## Some commands like a formula object:
@@ -150,11 +122,14 @@ xb0<-xBalance(balfmla,
 	      data=meddat,
 	      report=c("std.diffs","z.scores","adj.means",
 		       "adj.mean.diffs", "chisquare.test","p.values"))
+xb0
 ```
 
-> It looks like  places with Metrocable differed from places without it in ways that might matter for homicide rates. The "overall test" here is testing the hypothesis that all of the differences here arose from a randomized experiment (obvious this is not a randomized experiment, but a randomized experiment is a useful standard for comparison if you are asking, "How would I know that I have adjusted enough?" Here, the $p$-value is not super-small but not super-large: 4 out of about 20 hypothesis tests have $p$-values less than .05 --- we'd expect 1/20 by chance. So, this is not a terribly imbalanced situation but we wish that, at least, we were comparing places with high baseline homicide rates in 2003 that are similar to each other before Metrocable so that our endline comparison is easier to defend as having to do with Metrocable and not with pre-existing differences.
+### From the data set, we took variables which are listed above that could indicate substantial differences that could make comparsions between the groups unfair in the future. Then, we calculated the respective means of the different groups who would and would not recieve the treatment--or access to the bridge. For example, the data listed unerneath "nhTrt=0" are the respective means of all neighborhoods that did not obtain access to the bridge. In the context of class, the average person who did not get access to the bridge was 2.43, or roughly middle-class. The group of individuals who recieved the treatment, or got access to the bridge, on average were 1.77, which is slightly lower middle-class. However, we also tested to determine if there were differences between all the neighborhoods who got access to the bridge and those that did not due to random chance. We did this by calcualting the different variables respective z-scores and determing their p-values with an alpha level of 0.05.
 
- > We'll start by matching on baseline homicide rates alone: controlling for baseline homicide rates.
+### It appears that there are only four factors initially which are greatly imbalanced: nhClass, NhSisben, NhAboveHS, and nhTP03. However, there appears to be some degree of imbalance with HomRate03, nhPopD, and nhSepDiv. Although this situation off the get-go isn't super imbalanced, you would like the primary question answered: does funding public transportation to be rebuilt decrease violence? Since this is your primary question, we would like the rates of homocide to be matched more evenly before we begin with further analysis. Let's start by just matching based on the rates of homocide between the different neighborhoods in 2003 that will and will not get the Metrocable line. 
+
+We'll start by matching on baseline homicide rates alone: controlling for baseline homicide rates.
 
 ```{r}
 ## Scalar distance on baseline outcome
@@ -167,135 +142,55 @@ absdist[1:5,1:5]
 fm0 <- fullmatch(absdist ,data=meddat)
 summary(fm0)
 ```
-> Looks like we have 1 matched set with 3 neighborhoods with the metrocable intervention and 1 neighborhood without (3:1), 1 matched set with a 2 treated to 1 control ratio, 15 pairs, 1 set with 1 treated to 2 controls, and 1 set with 1 treated to 4 controls. No observations were thrown away because this is fullmatching.
 
+### In order to determine what neighborhoods are similar to one another in terms of homocide rates in 2003, we are going to look at a slew of different variables in the data set and do our best to make sure the neighborhoods who will and will not get the Metrocable line are as similar as possible to one another. To do this, our team took the homocides rates of all the different neighborhoods and looked at whether or not they got access to the Metrocable line. Then, we compared the different distances between all of these different data points to determine which neighborhoods had the least distance between them in terms of homocide rates and who got access to the Metrocable line. In short, we simply started by comparing the neighborhoods who got a Metrocable line and those who didn't to see which ones were most comparable wtih homocide rates in 2003.  Then, we took all neighborhoods that were as similar as possible to one another and determined which characteristics were the most similar to one another with features such as gender, age, income, class, etc. 
+
+### From this initial matching process based on solely homocide rates, we have matched 15 pairs of neighborhoods with 1 control and one treatment. However, there is a large degree of variation in what is being matched on. For example, one equitable comparsion is between three neighborhoods that got the Metrocable line and one that did not. It would appear that given the large amount of controlling that is occuring, we could appear to do a better job of matching becasue we have 15 neighborhoods that are not matched and comparable to the other 15. Put differently, "Looks like we have 1 matched set with 3 neighborhoods with the metrocable intervention and 1 neighborhood without (3:1), 1 matched set with a 2 treated to 1 control ratio, 15 pairs, 1 set with 1 treated to 2 controls, and 1 set with 1 treated to 4 controls." Furthermore, all the neighborhoods were included in this analysis since we are matching all charateristics of every neighborhood to one another. Let's see how well we did on matching. 
 
 ```{r}
 xb0a<-xBalance(update(balfmla,.~.+strata(fm0)),
 	      data=meddat,
 	      report=c("std.diffs","z.scores","adj.means",
 		       "adj.mean.diffs", "chisquare.test","p.values"))
-## xb0a
-## xb0a$overall
-## xb0a$results
-## plot(xb0a)
+
+xb0a$overall
+xb0a$results
+plot(xb0a)
 ## Some improvement in overall balance just from matching on baseline outcomes.
 ```
 
-> What does the mean baseline homicide rate look like within sets? Did we do a good job of controlling for baseline homicide rate?
+### The Tables and Figure above indicate a few important findings To start, it is important to note that the results above are only matched on homocide rates alone. We did not match on any other factors. 
+
+### Second, we are wanting to see if the matching we did helped to make the control and treatment groups more balanced. Signifigant differences between the adjusted differences between two variable means and their standardized differences would indicate that we did a poor job of matching: the larger the standarized difference (which is comparable to the z-score in signifigance testing), the worse job we did at matching. Looking at the figure with the standardized differences, it would appear that we did a poor job of matching on a few variables: homocide rates, population, nhPV03, and a few others. 
+
+### Although there isn't a "standardized" number with the standardized difference to indicate imbalance that warrents attention, for the purposes of our analysis we selected anything greater than a 10% change as indicating meaningful imbalance between the groups. This value was selected because anything higher than 10% would indicate a fairly large treatment size effect that could result with the covariation in the results. Anything below 10% should tend to have a fairly small effect on whatever results occur from the bridges, which should end up being negligible. Ultimately, the smaller the standardized differences between the groups after matching is ideal because it means the groups are more comparable and substantial differences are not affecting our results in drastic ways. However, it is possible that even a small standarized effect is acting as a covariate on our results and we are simply unaware of it's influece on our effects. 
+
+What does the mean baseline homicide rate look like within sets? Did we do a good job of controlling for baseline homicide rate?
+
+### The difference between the means in the groups that we matched on appear to be small. In this regard, on a case-by-case basis, it appears that we matched fairly well. However, when taking all of the different groups under one umbrella and comparing them all, it looks like we didn't do as good a job as we indicated above from the signifgance testing.
 
 ```{r}
-install.packages('tidyverse')
 library(tidyverse)
 meddat$fm0 <- as.factor(fm0)
 meddat %>% group_by(fm0) %>% summarize(diff=mean(HomRate03[nhTrt==1])-mean(HomRate03[nhTrt==0]),n=n())
 ```
 
-> Can we control for more than one variable at once? Rosenbaum Chapter 8 to 13 thinks so. Let's try it. We'll have to google stuff that we don't understand.
 
 ```{r}
-## Ordinary Propensity score
-glm1<-glm(balfmla,data=meddat,family=binomial)
-
-## Hmm... it seems like the propensity score model is overfit. Let's try something else to prevent such overfitting.
-
 ## Rank-Based Mahalanobis distance (Rosenbaum, Chap 8) doesn't require a propensity model to collapse all of the variables down to a simple score and thus distance
 mhdist<-match_on(balfmla,data=meddat,method="rank_mahalanobis")
 as.matrix(mhdist)[1:5,1:5]
 
-## What about other ways to create a propensity score?
-
-## Propensity score using elastic net with lambda chosen by cross-validation
-install.packages('glmnet')
-library(glmnet)
-X <- model.matrix(update(balfmla,~ -1+.),data=meddat)
-cv.glmnet1<-cv.glmnet(x=X,y=meddat$nhTrt,family="binomial",alpha=.5)
-
-## Bayesglm often works well (See Gelman's articles on separation and informative priors for logistic regression models)
-install.packages('arm')
-bayesglm1 <- arm::bayesglm(balfmla,data=meddat,family=binomial())
-
-
-
-## Add scores back to data
-meddat$pscore<-predict(glm1) ## linear.predictors not probs
-meddat$penpscore<-predict(cv.glmnet1$glmnet.fit,newx=X,s=cv.glmnet1$lambda.min)
-meddat$bpscore<-predict(bayesglm1)
-
-
-logitCoef<-coef(glm1)
-blogitCoef<-coef(bayesglm1)
-enetCoef<- as.matrix(coef(cv.glmnet1$glmnet.fit,newx=X[,-1],s=cv.glmnet1$lambda.min))
-## Just to compare the different coefs
-stopifnot(all.equal(names(logitCoef),row.names(enetCoef)))
-stopifnot(all.equal(names(blogitCoef),row.names(enetCoef)))
-cbind(logit=logitCoef,
-      enet=enetCoef,
-      bayeslogit=blogitCoef)
-
-## Make distance matrices
-psdist<-match_on(nhTrt~pscore,data=meddat)
-penpsdist<-match_on(nhTrt~penpscore,data=meddat)
-bpsdist<-match_on(nhTrt~bpscore,data=meddat)
-
-as.matrix(psdist)[1:5,1:5]
-as.matrix(bpsdist)[1:5,1:5]
-as.matrix(penpsdist)[1:5,1:5]
-```
-
-> Control and Treatment groups can be quite far apart on propensity scores.
-
-```{r}
-##  Pictures
-par(mfrow=c(1,3))
-with(meddat,boxplot(split(pscore,nhTrt),main="Logit"))
-with(meddat,boxplot(split(bpscore,nhTrt),main="Bayesian Logit"))
-with(meddat,boxplot(split(penpscore,nhTrt),main="Elastic Net"))
-```
-
-```{r}
-## Do it
-fm1<-fullmatch(mhdist,data=meddat) ##, min.controls=1) # min.controls=.5
-summary(fm1,data=meddat,min.controls=0,max.controls=Inf)
-
-## We have to show that we have adjusted enough. Did we adjust enough?
-xb1<-xBalance(update(balfmla,.~.+strata(fm1)),
-	      data=meddat,
-	      report=c("std.diffs","z.scores","adj.means",
-		       "adj.mean.diffs", "chisquare.test","p.values"))
-xb1$overall ## A bit better
-```
-
-```{r}
-## Add matched set indicators back to data
-meddat$fm1<-NULL
-meddat[names(fm1),"fm1"]<-fm1
-
-## What is the biggest difference within set.
-diffswithinsets<-meddat %>% group_by(fm1) %>% summarize(meandiff = mean(HomRate03[nhTrt==1]) - mean(HomRate03[nhTrt==0]))
-## sapply(split(meddat,meddat$fm1),function(dat){
-##	       with(dat,  mean(HomRate03[nhTrt==1]) - mean(HomRate03[nhTrt==0]))
-##	      })
-summary(diffswithinsets$meandiff)
-## Which set is the biggest diff? Which neighborhoods are these?
-bigdiff<-diffswithinsets[which.max(diffswithinsets$meandiff),]
-meddat[meddat$fm1 == bigdiff$fm1,]
-
-## Diff pre-matching
-with(meddat, mean(HomRate03[nhTrt==1]) - mean(HomRate03[nhTrt==0]))
-
-## What are the distances like? 
-quantile(as.vector(absdist),seq(0,1,.1))
-```
-
-```{r}
-## An example of a caliper using the MH Distance matrix
 caldist <- mhdist + caliper(absdist,1)
 as.matrix(absdist)[1:5,1:5]
 as.matrix(mhdist)[1:5,1:5]
 as.matrix(caldist)[1:5,1:5]
 
-### Looking for the extreme distances for us in calipers later
+as.matrix(absdist)
+as.matrix(mhdist)
+as.matrix(caldist)
+
+## Looking for the extreme distances for us in calipers later
 quantile(as.vector(psdist),seq(0,1,.1))
 quantile(as.vector(bpsdist),seq(0,1,.1))
 quantile(as.vector(penpsdist),seq(0,1,.1))
@@ -318,7 +213,187 @@ xb2$results["HomRate03",,]
 ## In the fm2 design, treated units and control units differed by about .1 baseline homicides per 1000 on average (or differed by about .06 sds in baseline homicides)
 ```
 
-> I think we've adjusted enough for now. Remember to do sensitivity analysis after this!
+### Although full matching on the different neighborhoods yielded some success, we would want to make sure that we match on as many variables as possible before continuing. Pair matching, in this context, does not seem appropriate. Due to the variation of certain variables in the data set that were discussed such as income and class, these differences make it difficult to say we have a fair comparsion to do pair matching based on just homocide rates alone. These variables could be altering the effects we observe with the treatment of the bridge. However, we can use a wonderful statistical technique and attempt to calculate the propensity scores of the different variables. The propensity score, according to Rosenbaum (2010), is "the conditional probability of exposure to treatment given the observed covariates" (p. 166). Put differently, a propensity score attempts to measure covariates in the data set that would influence the results of whatever treatment is being applied. In this case, we can calculate propensity scores in an attempt to reduce the bias of potential cofounding variables on our results. Once the analysis is conducted, we can reduce--as greatly as possible--the bias and influence of covariates. As a result, we would be looking at the average treatment effect across groups in the analysis that should be balanced. However, one limitation of propensity scores is that we cannot account for unobserved variables in the dataset. There could be other variables that are influencing the results of what is going on that were not collected. 
+
+### One way that we can calculate propensity scores is through the process of Rank-Based Mahalanobis distance. Given any neighborhood, we can calculate an average propensity score based on a host of different varaibles and attempt to match as closely as possible for each neighborhood based on their different characteristics. Certain neighborhoods, for example, who got the treatment and have access to the bridge may simply have a more elderly population but a lower level of income. However, other neighborhoods that did not get the treatment and do not have access to the bridge may have a younger population but a higher level of income. Unforutnatley, we cannot change the fundamental characteristics of the neighborhoods--we cannot make people poor or more wealthy to make them more "comparable" groups. However, we can use propensity score matching in an attempt to even out the differences between the two groups so that the differences are balanced. Put differently, matching based on the average propensity scores of each neighborhood should--most likely--balance the covariates in neighborhoods that got a Metro cable and those that did not. Furthermore, and most importantly, it helps us to balance the neighborhoods themselves before drawing conclusions.
+
+### In terms of the mechanical features of the Rank-Based Mahalanobis distance, we are creating a distance matrix of the average propensity scores for each neighborhood. Then, we calculate the caliper width. The caliper width could theoretically be any value we assigned it, but it is traditionally chosen as 20% of the standard deviation of the average propensity score of the distance matrix. The larger the calpher width, the more influence the covariets have on the influence of the results. Moreover, the larger the calpher width the more likely it is that the control and treatment groups are not equally balanced. Allowing for a bigger calipher width would result in more covariates that have highly volatile means, which could influence the reuslts of the variables. Given the controls, it appears that after calculating the propensity scores there was only an average difference in about 0.06 standard deviations in the basline rates of homocide in 2003. As a result, it appears that we adjusted the neighborhoods pretty well based on the propensity scores and calpher widths since the degree of variation in the means is fairly small.
+
+### Then, for each neighborhood, we calculated the propensity scores and their respective distances from one another by taking the treated neighborhood's propensity score that most closely matched to the untreated neighborhood propensity's score. After, we took the treated neighborhood's propensity score, substracted the control neighborhood's propensity score from it, and then squared the subsequent value. If this value is larger than the calpher width, we know it varies grealty and we shouldn't attempt to match based on this specific interaction. If it is under our calculated calpher width, then we can continue to match and make comparsions in our data set. Violations of the calpher width are indicated by an infinity symbol in the distance matrix. Other values that exist in the distance matrix are appropriate for comparing propensity scores and subsequent matching. Accordingly, this ensures that the different groups are approprietly matched with one another on specific variables to ensure that the propensity scores for both the treatment and control groups are matched upon equally. Ultimately, this means that we're ensuring the control and treatment groups are equally balanced.
+
+### Given our calculations with the Rank-Based Mahalanobis distance, it appears that the matching is far better already than when we simply tried to do full matching.
+
+Can we control for more than one variable at once? Rosenbaum Chapter 8 to 13 thinks so. Let's try it. We'll have to google stuff that we don't understand.
+
+```{r}
+## Ordinary Propensity score
+glm1<-glm(balfmla,data=meddat,family=binomial)
+glm1
+
+## Hmm... it seems like the propensity score model is overfit. Let's try something else to prevent such overfitting.
+```
+###If the model is overfit, then the coef on our IV will not be accurate. Thus, we should cross-validate this model (glm1).
+```{r}
+## Rank-Based Mahalanobis distance (Rosenbaum, Chap 8) doesn't require a propensity model to collapse all of the variables down to a simple score and thus distance
+mhdist<-match_on(balfmla,data=meddat,method="rank_mahalanobis")
+as.matrix(mhdist)[1:5,1:5]
+```
+###Since there is a lot of variance in our propensity scores, we should try other ways to match that achieve greater balance.
+```{r}
+
+## Propensity score using elastic net with lambda chosen by cross-validation
+library(glmnet)
+X <- model.matrix(update(balfmla,~ -1+.),data=meddat)
+cv.glmnet1<-cv.glmnet(x=X,y=meddat$nhTrt,family="binomial",alpha=.5)
+plot(cv.glmnet1)
+coef(cv.glmnet1)
+
+```
+###Here we have matched on propensity scores using an elastic net that chooses the model that is the most balanced. The figure shows that all of the covariates except `nhClass` and 'nhTP03' are balanced. The plot shows that lambda-- a measure of how covariates affect an DV-- decreases (what we want) after the elastic net chooses the model that does the best job of matching.
+###Alpha serves as the penalty applied to the propensity scores.
+```{r}
+
+## Bayesglm often works well (See Gelman's articles on separation and informative priors for logistic regression models)
+library(arm)
+bayesglm1 <- arm::bayesglm(balfmla,data=meddat,family=binomial())
+summary(bayesglm1)
+```
+###Using a bayesian model reduces the propensity scores.
+```{r}
+## Add scores back to data
+meddat$pscore<-predict(glm1) ## linear.predictors not probs
+summary(meddat$pscore)
+
+meddat$penpscore<-predict(cv.glmnet1$glmnet.fit,newx=X,s=cv.glmnet1$lambda.min)
+summary(meddat$penpscore)
+
+meddat$bpscore<-predict(bayesglm1)
+summary(meddat$bpscore)
+
+
+logitCoef<-coef(glm1)
+blogitCoef<-coef(bayesglm1)
+enetCoef<- as.matrix(coef(cv.glmnet1$glmnet.fit,newx=X[,-1],s=cv.glmnet1$lambda.min))
+## Just to compare the different coefs
+stopifnot(all.equal(names(logitCoef),row.names(enetCoef)))
+stopifnot(all.equal(names(blogitCoef),row.names(enetCoef)))
+cbind(logit=logitCoef,
+      enet=enetCoef,
+      bayeslogit=blogitCoef)
+
+## Make distance matrices
+psdist<-match_on(nhTrt~pscore,data=meddat)
+penpsdist<-match_on(nhTrt~penpscore,data=meddat)
+bpsdist<-match_on(nhTrt~bpscore,data=meddat)
+
+as.matrix(psdist)[1:5,1:5]
+as.matrix(bpsdist)[1:5,1:5]
+as.matrix(penpsdist)[1:5,1:5]
+```
+###This last display shows us the difference in propensity scores between treatment and control for the different models (bayes glm, logit, and elastic net)
+
+Control and Treatment groups can be quite far apart on propensity scores.
+
+```{r}
+##  Pictures
+par(mfrow=c(1,3))
+with(meddat,boxplot(split(pscore,nhTrt),main="Logit"))
+with(meddat,boxplot(split(bpscore,nhTrt),main="Bayesian Logit"))
+with(meddat,boxplot(split(penpscore,nhTrt),main="Elastic Net"))
+```
+
+```{r}
+## Do it
+fm1<-fullmatch(mhdist,data=meddat) ##, min.controls=1) # min.controls=.5
+summary(fm1,data=meddat,min.controls=0,max.controls=Inf)
+
+## We have to show that we have adjusted enough. Did we adjust enough?
+xb1<-xBalance(update(balfmla,.~.+strata(fm1)),
+	      data=meddat,
+	      report=c("std.diffs","z.scores","adj.means",
+		       "adj.mean.diffs", "chisquare.test","p.values"))
+xb1$overall ## A bit better
+xb1
+```
+###We can see how fullmatching on Mahalanobis distances(fm1) does a better job of adjusting the model for balance between treatment and control strata than adjustment based on absolute distance because the p-value drops to .42 whereas it was .49 with matching on absolute distances. The benefit of matchning on Mahalanobis distances over absolute distances is that Mahalanobis distances are 'scale invariant' meaning that it is not in the same units as the absolute distance. 
+
+```{r}
+## Add matched set indicators back to data
+meddat$fm1<-NULL
+meddat[names(fm1),"fm1"]<-fm1
+
+## What is the biggest difference within set.
+diffswithinsets<-meddat %>% group_by(fm1) %>% summarize(meandiff = mean(HomRate03[nhTrt==1]) - mean(HomRate03[nhTrt==0]))
+## sapply(split(meddat,meddat$fm1),function(dat){
+##	       with(dat,  mean(HomRate03[nhTrt==1]) - mean(HomRate03[nhTrt==0]))
+##	      })
+summary(diffswithinsets$meandiff)
+```
+###The biggest difference within sets is 8.933 as indicated by the max in the summary.
+```{r}
+## Which set is the biggest diff? Which neighborhoods are these?
+bigdiff<-diffswithinsets[which.max(diffswithinsets$meandiff),]
+meddat[meddat$fm1 == bigdiff$fm1,]
+bigdiff
+fm1
+```
+###It looks like set 1.11 has the biggest difference. These are neighborhoods 111 and ###407.
+```{r}
+
+## Diff pre-matching
+with(meddat, mean(HomRate03[nhTrt==1]) - mean(HomRate03[nhTrt==0]))
+```
+###Before matching the mean differences were .88
+```{r}
+## What are the distances like? 
+quantile(as.vector(absdist),seq(0,1,.1))
+```
+###Most of the distances are quite small. We see that 60% are within .85units. Fewer percent of the distances are big (greater than 1).
+
+```{r}
+## An example of a caliper using the MH Distance matrix
+caldist <- mhdist + caliper(absdist,1)
+as.matrix(absdist)[1:5,1:5]
+as.matrix(mhdist)[1:5,1:5]
+as.matrix(caldist)[1:5,1:5]
+```
+###Calipers set the maximum allowable distances between strata on the covariates.
+```{r}
+##Looking for the extreme distances for us in calipers later
+quantile(as.vector(psdist),seq(0,1,.1))
+quantile(as.vector(bpsdist),seq(0,1,.1))
+quantile(as.vector(penpsdist),seq(0,1,.1))
+```
+###It looks like the elastic net does the best job of eliminating large propensity scores if we look at the quantile distributions.
+```{r}
+## Wow! Two neighborhoods differed by 10 homicides per 1000??
+quantile(as.vector(absdist),seq(0,1,.1))
+quantile(as.vector(mhdist),seq(0,1,.1))
+```
+###Correct. Since the max absolute distance is 10.769 this indicates that two neighborhoods did differ in murder rate by 10+!
+```{r}
+fm2<-fullmatch(penpsdist+caliper(absdist,2)+caliper(mhdist,40)+
+	       caliper(bpsdist,2)+caliper(penpsdist,2),
+	       data=meddat,tol=.00001,min.controls=1)
+summary(fm2,min.controls=0,max.controls=Inf,propensity.model=bayesglm1)
+## Here we omitted 5 treatment neighborhoods, have 16 pairs, and 1 set with 1 treated and 5 controls, and omitted 2 control neighborhoods
+```
+###Our P-value dropped even further to .404. This is lower than the previous matching procedures we utilized. Thus, calipers seem to reduce the bias in our model by controlling for the observable covariates in the optimal way.
+```{r}
+xb2<-xBalance(update(balfmla,.~.+strata(fm0)+strata(fm1)+strata(fm2)),
+	      data=meddat,
+	      report=c("std.diffs","z.scores","adj.means",
+		       "adj.mean.diffs", "chisquare.test","p.values"))
+xb2$overall
+xb2$results["HomRate03",,]
+```
+###When we compare the different matching procedures, we see that fm2 does the best job of adjusting. It has a lower p-value than fm1 and fm0, but a higher p-value than the unadjusted model. However, given that some of the observable covariates affect the strata of our IV, we needed to adjust our model.
+```{r}
+## In the fm2 design, treated units and control units differed by about .1 baseline homicides per 1000 on average (or differed by about .06 sds in baseline homicides)
+```
+###Yup. Between the strata (treatment and control) there is roughly a .1 difference in baseline homocide rate.
+
+I think we've adjusted enough for now. Remember to do sensitivity analysis after this!
 
 ```{r}
 ## Estimating the average treatment effect of the metrocable intervention after adjusting for the 20 obsserved variables as specified above.
@@ -328,10 +403,7 @@ lm3<-lm(I(HomRate08-HomRate03)~nhTrt+fm2,data=meddat)
 coef(lm3)["nhTrt"]
 ```
 
-
-
-
-> But, we haven't said anything about *unobserved* covariates (which a truly randomized study would balance, but which our study does not).  Rosenbaum's sensitivity analysis is a formalized thought experiment
+But, we haven't said anything about *unobserved* covariates (which a truly randomized study would balance, but which our study does not).  Rosenbaum's sensitivity analysis is a formalized thought experiment
 
 > "In an observational study, a
   sensitivity analysis replaces qualitative claims about whether unmeasured
@@ -348,8 +420,8 @@ coef(lm3)["nhTrt"]
 
 ```{r}
 install.packages('sensitivitymv')
-library(sensitivitymv)
 install.packages('sensitivitymw')
+library(sensitivitymv)
 library(sensitivitymw)
 ```
 
@@ -385,10 +457,9 @@ respmat2<-with(meddat[matched(meddat$fm),],reshape_sensitivity(HomRate0803,nhTrt
 respmat2[10:14,]
 ```
 
-> The workflow: Second, assess sensitivity at different levels of $\Gamma$. 
+The workflow: Second, assess sensitivity at different levels of $\Gamma$. 
 
 ```{r}
-
 ## The first gamma assumes no unobserved confounders (including no functions of
 ## the observed covariates that we should be controlling for)
 
@@ -399,13 +470,17 @@ sensG1$pval ## Our current model
 sensG2$pval ## If this kind of thing existed, our results would no longer be distinguishable from zero
 ```
 
-> Hmmm... So it looks like our adjustment strategy worked well on our observed variables (We can show that we "controlled for" or "adjusted" well from that perspective using balance tests or inspecting differences within the matched sets). However, if there are variables out there --- including non-linear functions of the observed variables --- that would increase the odds of treatment for the treated neighborhoods to 2, then our analysis would **not** be robust to that. It might be robust to much smaller confounders --- so below we will search for the $\Gamma$ at which our $p$-values become greater than .05. 
+###So what this sensistivity analysis is able to show is that the adjustments made for the model have been successful. The senmv code run in the chunk above is able to show that when assessing if something has been left out then the results are close. The pval difference between when gamma=1 and gamma=2 is minimal which means that the model is well adjusted to. When linking this back to the Rosenbaum language above it means that we are able to quantatitively assess the magnitude of the unmeasured biases. This means that we are able to assess how strong our conclusions would be from the model created above.
 
-> That is to say: all observational studies have confounders. The issue is not whether one can control for all possible confounders in an observational study (using Rosenbaum's terminology here), but how much of a problem the confounders will pose for you --- how big they might be compared to the size of your effect. Any given analysis might be robust to some amount of confounding, or very sensitive.
+Hmmm... So it looks like our adjustment strategy worked well on our observed variables (We can show that we "controlled for" or "adjusted" well from that perspective using balance tests or inspecting differences within the matched sets). However, if there are variables out there --- including non-linear functions of the observed variables --- that would increase the odds of treatment for the treated neighborhoods to 2, then our analysis would **not** be robust to that. It might be robust to much smaller confounders --- so below we will search for the $\Gamma$ at which our $p$-values become greater than .05. 
+
+That is to say: all observational studies have confounders. The issue is not whether one can control for all possible confounders in an observational study (using Rosenbaum's terminology here), but how much of a problem the confounders will pose for you --- how big they might be compared to the size of your effect. Any given analysis might be robust to some amount of confounding, or very sensitive.
 
 ##  Why $\Gamma$?
 
-> How can an unobserved covariate confound our causal inferences? We need to have a model that we can play with in order to reason about this.  \textcite{rosenbaum2002observational} starts with a \textit{treatment odds ratio} for two units $i$ and $j$
+How can an unobserved covariate confound our causal inferences? We need to have a model that we can play with in order to reason about this. 
+
+\textcite{rosenbaum2002observational} starts with a \textit{treatment odds ratio} for two units $i$ and $j$
 
 \begin{center}
 \begin{align} \label{eq: treatment odds ratio}
@@ -430,7 +505,7 @@ A logarithm is simply the power to which a number must be raised in order to get
 
 ## Why $\Gamma$?
 
-> Say, we rescale $u$ to $[0,1]$, then we can write the original ratio of treatment odds using the logistic model and the unobserved covariate $u$:
+Say, we rescale $u$ to $[0,1]$, then we can write the original ratio of treatment odds using the logistic model and the unobserved covariate $u$:
 
 \begin{center}
 \begin{equation}
@@ -438,7 +513,7 @@ A logarithm is simply the power to which a number must be raised in order to get
 \end{equation}
 \end{center}
 
-> Since the minimum and maximum possible value for $u_i - u_j$ are $-1$ and $1$,
+Since the minimum and maximum possible value for $u_i - u_j$ are $-1$ and $1$,
 for any fixed $\gamma$ the upper and lower bounds on the treatment odds ratio
 are:
 
@@ -449,11 +524,11 @@ are:
 \end{equation}
 \end{center}
 
-> If we use $\Gamma$ for  $\mathrm{e}^{\gamma}$, then we can express \eqref{eq: treatment odds ratio bounds gamma} as \eqref{eq: treatment odds ratio} by substituting $\frac{1}{\Gamma}$ for $\mathrm{e}^{-\gamma}$ and $\Gamma$ for $\mathrm{e}^{\gamma}$.
+If we use $\Gamma$ for  $\mathrm{e}^{\gamma}$, then we can express \eqref{eq: treatment odds ratio bounds gamma} as \eqref{eq: treatment odds ratio} by substituting $\frac{1}{\Gamma}$ for $\mathrm{e}^{-\gamma}$ and $\Gamma$ for $\mathrm{e}^{\gamma}$.
 
 ## Why $\Gamma$?
 
-> \ldots so we can write the odds of treatment in terms of $\Gamma$ (the effect
+\ldots so we can write the odds of treatment in terms of $\Gamma$ (the effect
 of $u$ on the odds of treatment) for any two units $i$ and $j$ with the same
 covariates (i.e. in the same matched set):
 
@@ -463,12 +538,12 @@ covariates (i.e. in the same matched set):
 \end{equation}
 \end{center}
 
-> So when $\pi_i = \pi_j$ then $\Gamma=1$: the treatment probabilities are the same for the two units --- just as we would expect in a randomized study.
+So when $\pi_i = \pi_j$ then $\Gamma=1$: the treatment probabilities are the same for the two units --- just as we would expect in a randomized study.
 
 
 ## An example of sensitivity analysis: the search for Gamma
 
-> The workflow: Second, assess sensitivity at different levels of $\Gamma$ (here
+The workflow: Second, assess sensitivity at different levels of $\Gamma$ (here
 using two different test statistics).
 
 ```{r}
@@ -481,11 +556,11 @@ sensHresults<-sapply(somegammas,function(g){
 
 ## An example of sensitivity analysis: the search for Gamma
 
-> The workflow: Second, assess sensitivity at different levels of $\Gamma$ (here
+The workflow: Second, assess sensitivity at different levels of $\Gamma$ (here
 using two different test statistics).
 
-```{r echo=FALSE, out.width=".8\\textwidth"}
-par(mar=c(3,3,2,1),mfrow=c(1,1))
+```{r}
+par(mar=c(5,3,2,1),mfrow=c(1,1))
 plot(x = sensTresults['gamma',],
      y = sensTresults['pval',],
      xlab = "Gamma", ylab = "P-Value",
@@ -499,7 +574,7 @@ text(sensHresults['gamma',20],sensHresults['pval',20],label="Influential point r
 
 ## An example of sensitivity analysis: the search for Gamma
 
-> Or you can try to directly find the $\Gamma$ for a given $\alpha$ level test.
+Or you can try to directly find the $\Gamma$ for a given $\alpha$ level test.
 
 
 ```{r }
@@ -512,5 +587,7 @@ res2<-uniroot(f=findSensG,method="t",lower=1,upper=6,a=.05)
 res2$root
 ```
 
+###The figure above shows that the gamma for a p value to be less than 0.05 are above 1 but less than 2. For the test statistic "t", the gamma is between 1.2 and 1.3, where for the "h" test statistic it is between 1.1 and 1.2. The alpha tests made below the figure offer a more focused answer with the "t" test statistic being at 1.24 and the "h" test statisitc being at 1.18.
 
 # References
+
