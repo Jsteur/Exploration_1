@@ -1,4 +1,4 @@
----
+ggjcgc---
 title: 'Exploration 1: Engaging with Alternative Explanations with By Matched Stratification'
 author: "Jake Bowers"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
